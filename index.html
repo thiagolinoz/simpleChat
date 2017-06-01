@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Chat</title>
+    </head>
+ 
+    <body>
+        <h1>Bem vindo ao chat amizade</h1>
+        <p><input type="text" id="msg_enviar" /><input type="button" value="Envia" id="send" /></p>
+        <p class="chat_zone"></p><br>
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io.connect('http://localhost:8080');
+            
+            socket.on('message', function(data){
+                insertMsg(data.username, data.message);
+            })
+
+            socket.on('novo_user', function(user_novo){
+                $(".chat_zone").prepend("<p>"+user_novo+" entrou no bate-papo</p>");
+            });
+
+            var username = prompt('Qual seu nome?');
+            socket.emit('user', username);
+            document.title = username + ' - ' + document.title;
+
+            $("#send").click(function(){
+                msg = $("#msg_enviar").val();
+                insertMsg(username,msg);
+                socket.emit('message', msg);
+                $("#msg_enviar").val('').focus();
+            })
+
+            function insertMsg(username, message){
+                $('.chat_zone').prepend("<p>"+username+" disse: "+message+"</p>");
+            }
+        </script>
+    </body>
+</html>
